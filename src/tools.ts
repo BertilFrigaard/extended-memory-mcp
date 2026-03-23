@@ -3,6 +3,11 @@ import { z } from "zod";
 import { McpError } from "./errors.js";
 import { getMemoryBlob, getMemoryBlobList, createMemoryBlob, createMemoryEntry } from "./store.js";
 
+function logTool(tool: string, msg: string, data?: unknown) {
+	const entry = data !== undefined ? `[tool:${tool}] ${msg} ${JSON.stringify(data)}` : `[tool:${tool}] ${msg}`;
+	console.log(entry);
+}
+
 export function registerTools() {
 	server.registerTool(
 		"get_memory_blob_list",
@@ -11,11 +16,13 @@ export function registerTools() {
 			inputSchema: {},
 		},
 		async () => {
+			logTool("get_memory_blob_list", "called");
 			try {
 				const list = getMemoryBlobList();
 				return { content: [{ type: "text", text: JSON.stringify(list) }] };
 			} catch (e) {
 				if (e instanceof McpError) {
+					logTool("get_memory_blob_list", `error: ${e.message}`);
 					return { content: [{ type: "text", text: e.message }], isError: true };
 				}
 				throw e;
@@ -30,14 +37,17 @@ export function registerTools() {
 			inputSchema: { name: z.string().describe("The name of the memory blob") },
 		},
 		async ({ name }: { name: string }) => {
+			logTool("get_memory_blob", `called`, { name });
 			try {
 				const blob = getMemoryBlob(name);
 				if (!blob) {
+					logTool("get_memory_blob", `blob "${name}" not found`);
 					return { content: [{ type: "text", text: `No memory blob found with name "${name}"` }] };
 				}
 				return { content: [{ type: "text", text: JSON.stringify(blob) }] };
 			} catch (e) {
 				if (e instanceof McpError) {
+					logTool("get_memory_blob", `error: ${e.message}`);
 					return { content: [{ type: "text", text: e.message }], isError: true };
 				}
 				throw e;
@@ -55,11 +65,14 @@ export function registerTools() {
 			},
 		},
 		async ({ name, description }: { name: string; description: string }) => {
+			logTool("create_memory_blob", `called`, { name, description });
 			try {
 				createMemoryBlob(name, description);
+				logTool("create_memory_blob", `success: blob "${name}" created`);
 				return { content: [{ type: "text", text: `Memory blob "${name}" created.` }] };
 			} catch (e) {
 				if (e instanceof McpError) {
+					logTool("create_memory_blob", `error: ${e.message}`);
 					return { content: [{ type: "text", text: e.message }], isError: true };
 				}
 				throw e;
@@ -77,11 +90,14 @@ export function registerTools() {
 			},
 		},
 		async ({ blobName, entryText }: { blobName: string; entryText: string }) => {
+			logTool("create_memory_entry", `called`, { blobName, entryText });
 			try {
 				createMemoryEntry(blobName, entryText);
+				logTool("create_memory_entry", `success: entry added to "${blobName}"`);
 				return { content: [{ type: "text", text: `Entry added to blob "${blobName}".` }] };
 			} catch (e) {
 				if (e instanceof McpError) {
+					logTool("create_memory_entry", `error: ${e.message}`);
 					return { content: [{ type: "text", text: e.message }], isError: true };
 				}
 				throw e;

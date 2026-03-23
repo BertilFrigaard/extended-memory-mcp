@@ -21,16 +21,25 @@ const memoryStore: MemoryStore = {
 	archive: [],
 };
 
+function log(fn: string, msg: string, data?: unknown) {
+	const entry = data !== undefined ? `[store:${fn}] ${msg} ${JSON.stringify(data)}` : `[store:${fn}] ${msg}`;
+	console.log(entry);
+}
+
 export function getMemoryBlobList() {
-	return memoryStore.memory.map((v) => {
-		{
-			(v.name, v.description);
-		}
-	});
+	const list = memoryStore.memory.map((v) => ({ name: v.name, description: v.description }));
+	log("getMemoryBlobList", `returning ${list.length} blob(s)`, list);
+	return list;
 }
 
 export function getMemoryBlob(name: string) {
-	return memoryStore.memory.find((v) => v.name === name);
+	const blob = memoryStore.memory.find((v) => v.name === name);
+	if (blob) {
+		log("getMemoryBlob", `found blob "${name}" with ${blob.content.length} entries`);
+	} else {
+		log("getMemoryBlob", `blob "${name}" not found`);
+	}
+	return blob;
 }
 
 export function createMemoryBlob(name: string, description: string) {
@@ -42,6 +51,7 @@ export function createMemoryBlob(name: string, description: string) {
 		description: description,
 		content: [],
 	});
+	log("createMemoryBlob", `created blob "${name}"`, { description });
 }
 
 export function createMemoryEntry(blobName: string, entryText: string) {
@@ -49,5 +59,7 @@ export function createMemoryEntry(blobName: string, entryText: string) {
 	if (!blob) {
 		throw new McpError(`No memory blob exists with the name \"${blobName}\"`);
 	}
-	blob.content.push({ id: blob.content.length, text: entryText });
+	const id = blob.content.length;
+	blob.content.push({ id, text: entryText });
+	log("createMemoryEntry", `added entry id=${id} to blob "${blobName}"`, { entryText });
 }
