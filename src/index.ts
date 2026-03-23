@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createMcpExpressApp } from "@modelcontextprotocol/sdk/server/express.js";
 import type { Request, Response } from "express";
-import "./tools.js";
+import { registerTools } from "./tools.js";
 
 export const server = new McpServer({
 	name: "extended-memory-mcp",
@@ -14,6 +14,9 @@ export const server = new McpServer({
 		 memory blobs, which can act as relevant context in your conversation.",
 	version: "1.0.0",
 });
+
+// Tools should be registered after server is created
+registerTools();
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS ? process.env.ALLOWED_HOSTS.split(",") : undefined;
 
