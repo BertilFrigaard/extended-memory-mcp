@@ -19,7 +19,12 @@ server.registerTool(
 	},
 );
 
-const app = createMcpExpressApp();
+const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS ? process.env.ALLOWED_HOSTS.split(",") : undefined;
+
+const app = createMcpExpressApp({
+	host: "0.0.0.0",
+	...(ALLOWED_HOSTS ? { allowedHosts: ALLOWED_HOSTS } : {}),
+});
 
 app.post("/mcp", async (req: Request, res: Response) => {
 	try {
