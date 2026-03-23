@@ -21,7 +21,7 @@ const memoryStore: MemoryStore = {
 	archive: [],
 };
 
-function getMemoryBlobList() {
+export function getMemoryBlobList() {
 	return memoryStore.memory.map((v) => {
 		{
 			(v.name, v.description);
@@ -29,11 +29,11 @@ function getMemoryBlobList() {
 	});
 }
 
-function getMemoryBlob(name: string) {
+export function getMemoryBlob(name: string) {
 	return memoryStore.memory.find((v) => v.name === name);
 }
 
-function createMemoryBlob(name: string, description: string) {
+export function createMemoryBlob(name: string, description: string) {
 	if (getMemoryBlob(name)) {
 		throw new McpError(`Can not create a memory blob with the name \"${name}\" since a blob already exists with that name.`);
 	}
@@ -44,12 +44,10 @@ function createMemoryBlob(name: string, description: string) {
 	});
 }
 
-function createMemoryEntry(blobName: string, entryText: string) {
+export function createMemoryEntry(blobName: string, entryText: string) {
 	const blob = getMemoryBlob(blobName);
 	if (!blob) {
 		throw new McpError(`No memory blob exists with the name \"${blobName}\"`);
 	}
 	blob.content.push({ id: blob.content.length, text: entryText });
 }
-
-module.exports = { getMemoryBlob, getMemoryBlobList, createMemoryBlob, createMemoryEntry };

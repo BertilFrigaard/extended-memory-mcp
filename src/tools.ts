@@ -1,7 +1,7 @@
 import { server } from "./index.js";
 import { z } from "zod";
 import { McpError } from "./errors.js";
-const store = require("./store.js");
+import { getMemoryBlob, getMemoryBlobList, createMemoryBlob, createMemoryEntry } from "./store.js";
 
 server.registerTool(
 	"get_memory_blob_list",
@@ -11,7 +11,7 @@ server.registerTool(
 	},
 	async () => {
 		try {
-			const list = store.getMemoryBlobList();
+			const list = getMemoryBlobList();
 			return { content: [{ type: "text", text: JSON.stringify(list) }] };
 		} catch (e) {
 			if (e instanceof McpError) {
@@ -30,7 +30,7 @@ server.registerTool(
 	},
 	async ({ name }: { name: string }) => {
 		try {
-			const blob = store.getMemoryBlob(name);
+			const blob = getMemoryBlob(name);
 			if (!blob) {
 				return { content: [{ type: "text", text: `No memory blob found with name "${name}"` }] };
 			}
@@ -55,7 +55,7 @@ server.registerTool(
 	},
 	async ({ name, description }: { name: string; description: string }) => {
 		try {
-			store.createMemoryBlob(name, description);
+			createMemoryBlob(name, description);
 			return { content: [{ type: "text", text: `Memory blob "${name}" created.` }] };
 		} catch (e) {
 			if (e instanceof McpError) {
@@ -77,7 +77,7 @@ server.registerTool(
 	},
 	async ({ blobName, entryText }: { blobName: string; entryText: string }) => {
 		try {
-			store.createMemoryEntry(blobName, entryText);
+			createMemoryEntry(blobName, entryText);
 			return { content: [{ type: "text", text: `Entry added to blob "${blobName}".` }] };
 		} catch (e) {
 			if (e instanceof McpError) {
