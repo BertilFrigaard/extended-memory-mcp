@@ -3,21 +3,16 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { createMcpExpressApp } from "@modelcontextprotocol/sdk/server/express.js";
 import type { Request, Response } from "express";
 
-const server = new McpServer({
+export const server = new McpServer({
 	name: "extended-memory-mcp",
+	description:
+		"This is your memory. A little about the architecture of your memory: \
+		 You have access to a list of memory blobs. A memory blob is a container \
+	     that contains related memory entries. A memory entry is the actual \
+	     memory text. When a user asks anything you should always lookup relevant \
+		 memory blobs, which can act as relevant context in your conversation.",
 	version: "1.0.0",
 });
-
-server.registerTool(
-	"get_archives",
-	{
-		description: "Get a list of memory archives",
-		inputSchema: {},
-	},
-	async () => {
-		return { content: [{ type: "text", text: "hello world" }] };
-	},
-);
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS ? process.env.ALLOWED_HOSTS.split(",") : undefined;
 
