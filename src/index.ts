@@ -1,8 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createMcpExpressApp } from "@modelcontextprotocol/sdk/server/express.js";
+import { mcpAuthRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
+import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import type { Request, Response } from "express";
 import { registerTools } from "./tools.js";
+import { oauthProvider } from "./oauth/provider.js";
 
 export const server = new McpServer({
 	name: "extended-memory-mcp",
@@ -24,6 +27,22 @@ const app = createMcpExpressApp({
 	host: "0.0.0.0",
 	...(ALLOWED_HOSTS ? { allowedHosts: ALLOWED_HOSTS } : {}),
 });
+
+const PUBLIC_URL = process.env.PUBLIC_URL;
+if (!PUBLIC_URL) {
+	console.error("FATAL: PUBLIC_URL environment variable must be set (e.g. https://mcp.example.com).");
+	process.exit(1);
+}
+
+// Mount OAuth endpoints (/.well-known/..., /authorize, /token, /register)
+app.use(mcpAuthRouter({
+	provider: oauthProvider,
+	issuerUrl: new URL(PUBLIC_URL),
+	resourceServerUrl: new URL(PUBLIC_URL),
+}));
+
+// Guard /mcp with bearer token validation
+app.use("/mcp", requireBearerAuth({ verifier: oauthProvider }));
 
 app.post("/mcp", async (req: Request, res: Response) => {
 	try {
